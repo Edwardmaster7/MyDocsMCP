@@ -1,50 +1,50 @@
-# MyDocsMCP: MCP Server para Acervo de PDFs
+# MyDocsMCP: MCP Server for PDF Collections
 
-Este projeto é um **Model Context Protocol (MCP) Server** que permite realizar buscas semânticas (RAG local) sobre acervos de documentos PDF. Ele utiliza o framework **FastMCP**, o banco de vetores **ChromaDB** e modelos de embeddings locais do **Sentence Transformers**.
+This project is a **Model Context Protocol (MCP) Server** that enables semantic search (local RAG) over a collection of PDF documents. It uses the **FastMCP** framework, the **ChromaDB** vector database, and local embedding models from **Sentence Transformers**.
 
-## Arquitetura
-- **Busca Semântica:** RAG (Retrieval-Augmented Generation) 100% local (offline).
-- **Embeddings:** `paraphrase-multilingual-mpnet-base-v2` (suporte a Português).
-- **Vector DB:** ChromaDB persistente.
-- **Watcher:** Monitora novos PDFs na pasta `./data/pdfs` e indexa-os automaticamente via `watchdog`.
+## Architecture
+- **Semantic Search:** 100% local (offline) RAG (Retrieval-Augmented Generation).
+- **Embeddings:** `paraphrase-multilingual-mpnet-base-v2` (supports Portuguese).
+- **Vector DB:** Persistent ChromaDB.
+- **Watcher:** Monitors new PDFs in the `./data/pdfs` folder and indexes them automatically via `watchdog`.
 
 ---
 
-## Como Usar
+## How to Use
 
-### 1. Preparação dos Dados
-Coloque seus PDFs na pasta `./data/pdfs/`. Se quiser organizar por disciplinas, crie subpastas:
+### 1. Data Preparation
+Place your PDFs in the `./data/pdfs/` folder. If you want to organize them by disciplines, create subfolders:
 ```text
 data/pdfs/
-  ├── IA-Generativa/
-  │   └── aula1.pdf
+  ├── Generative-AI/
+  │   └── lecture1.pdf
   └── Machine-Learning/
       └── fundamentals.pdf
 ```
-O nome da subpasta será usado como metadado `discipline`.
+The subfolder name will be used as the `discipline` metadata.
 
-### 2. Rodando via Docker (Recomendado)
+### 2. Running via Docker (Recommended)
 
-O Docker garante um ambiente isolado com todas as dependências do sistema (como a biblioteca `libmupdf`).
+Docker ensures an isolated environment with all system dependencies (like the `libmupdf` library).
 
 ```bash
-# Build da imagem (baixa o modelo de embeddings no build)
+# Build the image (downloads the embeddings model during the build)
 docker build -t mydocs-mcp .
 
-# Rodando o container (montando os volumes de PDFs e banco de dados)
+# Run the container (mounting the PDFs and database volumes)
 docker run -i --rm \
   -v "$(pwd)/data/pdfs:/data/pdfs:ro" \
   -v "mydocs-chroma:/data/chroma_db" \
   mydocs-mcp
 ```
 
-### 3. Configuração no Claude Desktop
+### 3. Claude Desktop Configuration
 
-Para utilizar o servidor no Claude Desktop, adicione a configuração abaixo no seu arquivo `claude_desktop_config.json`:
+To use the server in Claude Desktop, add the configuration below to your `claude_desktop_config.json` file:
 
-**Caminho no macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+**macOS Path:** `~/Library/Application Support/Claude/claude_desktop_config.json`
 
-#### Usando Docker (mais estável):
+#### Using Docker (more stable):
 ```json
 {
   "mcpServers": {
@@ -52,7 +52,7 @@ Para utilizar o servidor no Claude Desktop, adicione a configuração abaixo no 
       "command": "docker",
       "args": [
         "run", "-i", "--rm",
-        "-v", "/Users/SEU_USUARIO/Caminho/Para/MyDocsMCP/data/pdfs:/data/pdfs:ro",
+        "-v", "/Users/YOUR_USER/Path/To/MyDocsMCP/data/pdfs:/data/pdfs:ro",
         "-v", "mydocs-chroma:/data/chroma_db",
         "mydocs-mcp:latest"
       ]
@@ -61,19 +61,19 @@ Para utilizar o servidor no Claude Desktop, adicione a configuração abaixo no 
 }
 ```
 
-#### Usando uv (diretamente no sistema):
+#### Using uv (directly on the system):
 ```json
 {
   "mcpServers": {
     "mydocsmcp": {
       "command": "uv",
       "args": [
-        "--directory", "/Users/SEU_USUARIO/Caminho/Para/MyDocsMCP",
+        "--directory", "/Users/YOUR_USER/Path/To/MyDocsMCP",
         "run", "python", "src/server.py"
       ],
       "env": {
-        "PYTHONPATH": "/Users/SEU_USUARIO/Caminho/Para/MyDocsMCP",
-        "PDF_DIR": "/Users/SEU_USUARIO/Caminho/Para/MyDocsMCP/data/pdfs"
+        "PYTHONPATH": "/Users/YOUR_USER/Path/To/MyDocsMCP",
+        "PDF_DIR": "/Users/YOUR_USER/Path/To/MyDocsMCP/data/pdfs"
       }
     }
   }
@@ -82,36 +82,36 @@ Para utilizar o servidor no Claude Desktop, adicione a configuração abaixo no 
 
 ---
 
-## Ferramentas Expostas (Tools)
+## Exposed Tools
 
-- `search_documents(query, top_k=5, discipline=None)`: Busca semântica no acervo.
-- `list_documents(discipline=None)`: Lista PDFs indexados.
-- `cross_topic_search(query, disciplines)`: Busca transversal em múltiplos temas.
-- `get_index_stats()`: Estatísticas do banco de vetores.
-- `ingest_new_documents(path=None, force_reindex=False)`: Força re-ingestão manual.
+- `search_documents(query, top_k=5, discipline=None)`: Semantic search in the collection.
+- `list_documents(discipline=None)`: Lists indexed PDFs.
+- `cross_topic_search(query, disciplines)`: Cross-topic search across multiple disciplines.
+- `get_index_stats()`: Vector database statistics.
+- `ingest_new_documents(path=None, force_reindex=False)`: Forces manual re-ingestion.
 
 ---
 
-## Desenvolvimento Local (Python)
+## Local Development (Python)
 
-Se desejar rodar localmente sem Docker, utilize o gerenciador de pacotes **uv**:
+If you wish to run locally without Docker, use the **uv** package manager:
 
 ```bash
-# Instalar dependências
+# Install dependencies
 uv sync
 
-# Rodar o servidor (com PYTHONPATH configurado)
+# Run the server (with PYTHONPATH configured)
 PYTHONPATH=. uv run python src/server.py
 ```
 
-### Rodando Testes
+### Running Tests
 ```bash
 uv run pytest
 ```
 
 ---
 
-## Tecnologias Utilizadas
+## Technologies Used
 - [FastMCP](https://github.com/jlowin/fastmcp)
 - [uv](https://github.com/astral-sh/uv)
 - [ChromaDB](https://www.trychroma.com/)
