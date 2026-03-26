@@ -1,9 +1,9 @@
 {
-  "name": "mydocs-mcp",
+  "name": "mydocsmcp",
   "version": "1.0.0",
   "description": "MCP server para busca semântica em acervos de PDFs",
   "bin": {
-    "mydocs-mcp": "./bin/run.js"
+    "mydocsmcp": "./bin/run.js"
   },
   "scripts": {
     "start": "node bin/run.js"
