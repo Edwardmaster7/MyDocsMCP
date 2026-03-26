@@ -1,0 +1,25 @@
+version: '3.9'
+
+services:
+  mydocs-mcp:
+    build: .
+    image: mydocs-mcp:latest
+    stdin_open: true      # Necessário para o transporte stdio do MCP
+    tty: false
+    volumes:
+      - ./data/pdfs:/data/pdfs:ro          # PDFs são somente-leitura pelo container
+      - chroma_db:/data/chroma_db          # Vector DB
+      - sqlite_meta:/data/metadata         # Metadados SQLite
+    environment:
+      - PDF_DIR=/data/pdfs
+      - CHROMA_DIR=/data/chroma_db
+      - METADATA_DIR=/data/metadata
+      - EMBEDDING_MODEL=paraphrase-multilingual-mpnet-base-v2
+      - CHUNK_SIZE=300
+      - CHUNK_OVERLAP=50
+      - LOG_LEVEL=INFO
+    restart: unless-stopped
+
+volumes:
+  chroma_db:
+  sqlite_meta:
