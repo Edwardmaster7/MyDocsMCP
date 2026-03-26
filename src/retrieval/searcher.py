@@ -55,9 +55,13 @@ class SemanticSearcher:
             filename = meta.get('filename', 'Unknown File')
             page = meta.get('page', '?')
             discipline = meta.get('discipline', 'Unknown Discipline')
-            text = res.get('text', '')
             
-            formatted.append(f"--- Result {i+1} ---\nFile: {filename} (Page {page}) - Discipline: {discipline}\nContent: {text}\n")
+            # Use parent_text if available for larger context, fallback to child text
+            text = meta.get('parent_text')
+            if not text:
+                text = res.get('text', '')
+            
+            formatted.append(f"--- Result {i+1} ---\nFile: {filename} (Page {page}) - Discipline: {discipline}\nContent:\n{text}\n")
             
         return "\n".join(formatted)
 

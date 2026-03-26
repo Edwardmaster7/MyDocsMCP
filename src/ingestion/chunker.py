@@ -37,6 +37,7 @@ class ParentChildChunker:
                         "id": str(uuid.uuid4()),
                         "parent_id": parent_id,
                         "text": c_text,
+                        "parent_text": p_text, # <--- AQUI: Salvamos o contexto do pai no filho
                         "page": page["page"],
                         "filename": page["filename"]
                     })

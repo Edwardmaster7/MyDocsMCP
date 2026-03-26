@@ -118,7 +118,8 @@ class IngestionPipeline:
                 "discipline": discipline,
                 "page": c.get("page", 0),
                 "doc_hash": fhash,
-                "parent_id": c.get("parent_id", "")
+                "parent_id": c.get("parent_id", ""),
+                "parent_text": c.get("parent_text", "") # Store full context
             } for c in batch_chunks]
             
             self.collection.upsert(
