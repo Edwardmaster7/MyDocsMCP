@@ -3,6 +3,7 @@
 This project is a **Model Context Protocol (MCP) Server** that enables semantic search (local RAG) over a collection of PDF documents. It uses the **FastMCP** framework, the **ChromaDB** vector database, and local embedding models from **Sentence Transformers**.
 
 ## Architecture
+
 - **Semantic Search:** 100% local (offline) RAG (Retrieval-Augmented Generation).
 - **Embeddings:** `paraphrase-multilingual-mpnet-base-v2` (supports Portuguese).
 - **Vector DB:** Persistent ChromaDB.
@@ -13,7 +14,9 @@ This project is a **Model Context Protocol (MCP) Server** that enables semantic 
 ## How to Use
 
 ### 1. Data Preparation
+
 Place your PDFs in the `./data/pdfs/` folder. If you want to organize them by disciplines, create subfolders:
+
 ```text
 data/pdfs/
   ├── Generative-AI/
@@ -21,64 +24,34 @@ data/pdfs/
   └── Machine-Learning/
       └── fundamentals.pdf
 ```
+
 The subfolder name will be used as the `discipline` metadata.
 
-### 2. Running via Docker (Recommended)
+### 2. Extremely Simple Configuration (Claude / Gemini Desktop)
 
-Docker ensures an isolated environment with all system dependencies (like the `libmupdf` library).
+To use the server, add the configuration below to your agent's JSON file (`claude_desktop_config.json` or Gemini's `settings.json`).
 
-```bash
-# Build the image (downloads the embeddings model during the build)
-docker build -t mydocs-mcp .
+**Claude Path (macOS):** `~/Library/Application Support/Claude/claude_desktop_config.json`
+**Gemini Path (macOS):** `~/.gemini/settings.json`
 
-# Run the container (mounting the PDFs and database volumes)
-docker run -i --rm \
-  -v "$(pwd)/data/pdfs:/data/pdfs:ro" \
-  -v "mydocs-chroma:/data/chroma_db" \
-  mydocs-mcp
-```
+The server automatically resolves all data folders (`pdfs`, `metadata`, `chroma_db`) based on the project root. You only need to provide the absolute path where you cloned the repository:
 
-### 3. Claude Desktop Configuration
-
-To use the server in Claude Desktop, add the configuration below to your `claude_desktop_config.json` file:
-
-**macOS Path:** `~/Library/Application Support/Claude/claude_desktop_config.json`
-
-#### Using Docker (more stable):
-```json
-{
-  "mcpServers": {
-    "mydocsmcp": {
-      "command": "docker",
-      "args": [
-        "run", "-i", "--rm",
-        "-v", "/Users/YOUR_USER/Path/To/MyDocsMCP/data/pdfs:/data/pdfs:ro",
-        "-v", "mydocs-chroma:/data/chroma_db",
-        "mydocs-mcp:latest"
-      ]
-    }
-  }
-}
-```
-
-#### Using uv (directly on the system):
 ```json
 {
   "mcpServers": {
     "mydocsmcp": {
       "command": "uv",
       "args": [
-        "--directory", "/Users/YOUR_USER/Path/To/MyDocsMCP",
-        "run", "python", "src/server.py"
-      ],
-      "env": {
-        "PYTHONPATH": "/Users/YOUR_USER/Path/To/MyDocsMCP",
-        "PDF_DIR": "/Users/YOUR_USER/Path/To/MyDocsMCP/data/pdfs"
-      }
+        "--directory", "/Absolute/Path/To/Your/MyDocsMCP",
+        "run",
+        "mydocs-mcp"
+      ]
     }
   }
 }
 ```
+
+**That's it!** No additional environment variables (`PYTHONPATH`, `PDF_DIR`, etc.) are required. The setup "Just Works"™.
 
 ---
 
@@ -94,17 +67,18 @@ To use the server in Claude Desktop, add the configuration below to your `claude
 
 ## Local Development (Python)
 
-If you wish to run locally without Docker, use the **uv** package manager:
+We use the **uv** package manager:
 
 ```bash
 # Install dependencies
 uv sync
 
-# Run the server (with PYTHONPATH configured)
-PYTHONPATH=. uv run python src/server.py
+# Run the server
+uv run mydocs-mcp
 ```
 
 ### Running Tests
+
 ```bash
 uv run pytest
 ```
@@ -112,6 +86,7 @@ uv run pytest
 ---
 
 ## Technologies Used
+
 - [FastMCP](https://github.com/jlowin/fastmcp)
 - [uv](https://github.com/astral-sh/uv)
 - [ChromaDB](https://www.trychroma.com/)

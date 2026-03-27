@@ -1,16 +1,17 @@
 import os
 import chromadb
 from src.ingestion.embedder import LocalEmbedder
+from src.config import CHROMA_DIR, log_stderr
 
 class SemanticSearcher:
     def __init__(self):
-        self.chroma_dir = os.environ.get("CHROMA_DIR", "./data/chroma_db")
+        self.chroma_dir = str(CHROMA_DIR)
         
         try:
             self.chroma = chromadb.PersistentClient(path=self.chroma_dir)
             self.collection = self.chroma.get_or_create_collection("fiap_pdfs")
         except Exception as e:
-            print(f"Warning: Could not initialize ChromaDB at {self.chroma_dir}: {e}")
+            log_stderr(f"Warning: Could not initialize ChromaDB at {self.chroma_dir}: {e}")
             self.collection = None
             
         self.embedder = LocalEmbedder()

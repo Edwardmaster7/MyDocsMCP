@@ -2,6 +2,7 @@ from fastmcp import FastMCP
 from src.retrieval.searcher import SemanticSearcher
 from src.ingestion.pipeline import IngestionPipeline
 from src.watcher import start_watcher
+from src.config import log_stderr
 import asyncio
 import os
 
@@ -64,7 +65,7 @@ def main():
     import threading
     
     # We run the ingestion initially
-    print("Running initial ingestion...")
+    log_stderr("Running initial ingestion...")
     pipeline.ingest()
     
     # Run watcher in a separate thread so FastMCP event loop isn't blocked
@@ -80,7 +81,7 @@ def main():
     t.start()
     
     # Run the server
-    print("Starting MCP server...")
+    log_stderr("Starting MCP server...")
     mcp.run()
 
 if __name__ == "__main__":

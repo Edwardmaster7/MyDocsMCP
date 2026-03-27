@@ -6,12 +6,13 @@ import chromadb
 from src.ingestion.extractor import PDFExtractor
 from src.ingestion.chunker import ParentChildChunker
 from src.ingestion.embedder import LocalEmbedder
+from src.config import PDF_DIR, CHROMA_DIR, METADATA_DIR, log_stderr
 
 class IngestionPipeline:
     def __init__(self):
-        self.pdf_dir = Path(os.environ.get("PDF_DIR", "./data/pdfs"))
-        self.chroma_dir = os.environ.get("CHROMA_DIR", "./data/chroma_db")
-        self.metadata_dir = Path(os.environ.get("METADATA_DIR", "./data/metadata"))
+        self.pdf_dir = Path(PDF_DIR)
+        self.chroma_dir = str(CHROMA_DIR)
+        self.metadata_dir = Path(METADATA_DIR)
         
         # Ensure directories exist
         self.pdf_dir.mkdir(parents=True, exist_ok=True)
@@ -73,7 +74,7 @@ class IngestionPipeline:
                 # Extract text
                 pages = self.extractor.extract(pdf)
                 if not pages:
-                    print(f"Warning: No text extracted from {pdf.name}")
+                    log_stderr(f"Warning: No text extracted from {pdf.name}")
                     skipped += 1
                     continue
 
@@ -98,7 +99,7 @@ class IngestionPipeline:
                 
             except Exception as e:
                 errors += 1
-                print(f"Error processing {pdf}: {e}", flush=True)
+                log_stderr(f"Error processing {pdf}: {e}", flush=True)
                 
         return {"new": new, "skipped": skipped, "errors": errors}
 
