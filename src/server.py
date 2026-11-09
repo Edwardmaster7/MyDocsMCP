@@ -64,12 +64,11 @@ async def ingest_new_documents(path: str = None, force_reindex: bool = False) ->
 def main():
     import threading
     
-    # We run the ingestion initially
-    log_stderr("Running initial ingestion...")
-    pipeline.ingest()
-    
-    # Run watcher in a separate thread so FastMCP event loop isn't blocked
+    # Initial ingestion and watcher run in a background thread: blocking here
+    # delays the MCP handshake past the client's connect timeout on large collections.
     def run_watcher():
+        log_stderr("Running initial ingestion...")
+        pipeline.ingest()
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         try:
